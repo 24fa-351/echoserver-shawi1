@@ -7,7 +7,6 @@
 
 #define BUFFER_SIZE 1024
 
-// Function to handle each client connection
 void *handle_client(void *client_socket)
 {
     int client_fd = *(int *)client_socket;
@@ -16,10 +15,8 @@ void *handle_client(void *client_socket)
     char buffer[BUFFER_SIZE];
     while ((bytes_received = recv(client_fd, buffer, BUFFER_SIZE - 1, 0)) > 0)
     {
-        buffer[bytes_received] = '\0';  // Null-terminate the received data
-        printf("Received: %s", buffer); // Print the received line
-
-        // Echo the entire received buffer back to the client
+        buffer[bytes_received] = '\0';
+        printf("Received: %s", buffer);
         send(client_fd, buffer, bytes_received, 0);
     }
 
@@ -49,7 +46,6 @@ void start_echo_server(int port)
         exit(EXIT_FAILURE);
     }
 
-    // Set up the server address structure
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(port);
@@ -64,7 +60,7 @@ void start_echo_server(int port)
 
     // Listen for incoming connections
     if (listen(server_fd, 10) == -1)
-    { // Increased backlog to 10 for handling multiple clients
+    {
         perror("Listening failed");
         close(server_fd);
         exit(EXIT_FAILURE);
@@ -77,8 +73,7 @@ void start_echo_server(int port)
         struct sockaddr_in client_addr;
         socklen_t addr_len = sizeof(client_addr);
 
-        // Accept an incoming connection
-        int *client_fd = malloc(sizeof(int)); // Allocate memory for client socket
+        int *client_fd = malloc(sizeof(int));
         if ((*client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len)) == -1)
         {
             perror("Accepting connection failed");
@@ -98,19 +93,15 @@ void start_echo_server(int port)
             continue;
         }
 
-        // Detach the thread to automatically free resources when done
         pthread_detach(thread_id);
     }
 
-    // Close the server socket
     close(server_fd);
 }
 
 int main(int argc, char *argv[])
 {
     int port = 0;
-
-    // Check for the -p argument and parse the port
     if (argc != 3 || strcmp(argv[1], "-p") != 0)
     {
         fprintf(stderr, "Usage: %s -p <port>\n", argv[0]);
@@ -124,7 +115,6 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // Start the echo server on the specified port
     start_echo_server(port);
 
     return 0;
